@@ -1,0 +1,23 @@
+{
+  "manifest_version": 2,
+  "name": "Lector de texto",
+  "version": "1.0",
+  "description": "Una extensión de Chrome que lee el contenido de texto de una página web",
+  "permissions": ["tabs", "https://*/*", "http://*/*"],
+  "browser_action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon.png",
+      "48": "icon.png",
+      "128": "icon.png"
+    }
+  },
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
+  "background": {
+    "scripts": ["background.js"]
+  }
+}
