@@ -1,6 +1,6 @@
 const express = require("express")
 const cors = require("cors")
-const { generateData } = require("../generateData")
+const { generateData } = require("./generateData")
 
 const app = express()
 app.use(cors())
