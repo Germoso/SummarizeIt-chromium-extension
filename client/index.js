@@ -3,40 +3,44 @@ const $$ = (query) => document.querySelectorAll(query)
 
 const $root = $(".root")
 
+const exampleResponse =
+  "El sitio web es TextGears, un corrector de ortografía y gramática impulsado por IA con corrección automática. Además, proporciona herramientas para resumen de texto, extracción de palabras clave, detección de idioma y cálculo de legibilidad. Está calificado 9.8 de 10, tardó 2.560 milisegundos en cargarse y tuvo un porcentaje de éxito del 49%. Además, proporciona documentación de la API TextGears, y una Playground de la API para comenzar a probarlo.El sitio web es TextGears, un corrector de ortografía y gramática impulsado por IA con corrección automática. Además, proporciona herramientas para resumen de texto, extracción de palabras clave, detección de idioma y cálculo de legibilidad. Está calificado 9.8 de 10, tardó 2.560 milisegundos en cargarse y tuvo un porcentaje de éxito del 49%. Además, proporciona documentación de la API TextGears, y una Playground de la API para comenzar a probarlo."
+
 document.addEventListener("DOMContentLoaded", async function () {
+  chrome.runtime.sendMessage({
+    action: "injectScript",
+    script: `chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+    if (request.action === "getContent") {
+      var elementos = document.querySelectorAll('p, h1, h2, b, strong, i, em');
+      var content = '';
+      
+      elementos.forEach(function(elemento) {
+        content += elemento.textContent + '\\n';
+      });
+          
+      sendResponse({ content: content });
+    }
+  });`,
+  })
+
   $(".btn").addEventListener("click", async function () {
-    const Loader = await importComponent("./components/loader.html")
-    $root.innerHTML = Loader
+    $root.innerHTML = await importComponent("./components/loader.html")
+
     const rowPageTextContent = await getTextContent()
     console.log(rowPageTextContent)
     console.log(rowPageTextContent.length)
     const pageTextContent = formatText(rowPageTextContent)
     if (pageTextContent) {
       const data = await analize(pageTextContent)
-      console.log(data)
-      $root.innerHTML = `<textarea class="result" readonly>${data}</textarea>`
+      $root.innerHTML = await importComponent("./components/result.html")
+      // $(".result").textContent = exampleResponse
+      $(".result").textContent = data
     }
   })
 })
 
 const getTextContent = () =>
   new Promise((resolve, reject) => {
-    chrome.runtime.sendMessage({
-      action: "injectScript",
-      script: `chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
-      if (request.action === "getContent") {
-        var elementos = document.querySelectorAll('p, h1, h2, b, strong, i, em');
-        var content = '';
-        
-        elementos.forEach(function(elemento) {
-          content += elemento.textContent + '\\n';
-        });
-            
-        sendResponse({ content: content });
-      }
-    });`,
-    })
-
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       chrome.tabs.sendMessage(
         tabs[0].id,
